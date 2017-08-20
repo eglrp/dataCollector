@@ -13,6 +13,19 @@
 #define SYSFS_GPIO_DIR "/sys/class/gpio"
 #define MAX_BUF 64
 namespace GPIO{
+
+    enum Direction{
+        IN = 0,
+        OUT = 1
+    };
+
+    enum Pin{
+        LOW = 0,
+        HIGH = 1
+    };
+
+
+
     /// gpio export
     int gpio_export(unsigned int gpio)
     {
