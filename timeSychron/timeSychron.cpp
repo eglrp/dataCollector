@@ -31,10 +31,20 @@ int main()
     std::function<void(void)> checkFunction = [&](void)->void{
         while (1)
         {
-            GPIO::gpio_set_value(gpio_check,GPIO::Pin::HIGH);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            GPIO::gpio_set_value(gpio_check,GPIO::Pin::LOW);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            for(int i=0;i<80;i++)
+            {
+                GPIO::gpio_set_value(gpio_check,GPIO::Pin::HIGH);
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                GPIO::gpio_set_value(gpio_check,GPIO::Pin::LOW);
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            for(int i=0;i<100;i++)
+            {
+                GPIO::gpio_set_value(gpio_check,GPIO::Pin::HIGH);
+                std::this_thread::sleep_for(std::chrono::milliseconds(2));
+                GPIO::gpio_set_value(gpio_check,GPIO::Pin::LOW);
+                std::this_thread::sleep_for(std::chrono::milliseconds(2));
+            }
         }
     };
 
