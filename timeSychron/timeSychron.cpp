@@ -24,7 +24,7 @@ int main()
     //3x32+29 = 125
     const int goio_pps = 125;
     GPIO::gpio_export(goio_pps);
-    GPIO::gpio_set_dir(gpio_check,GPIO::Direction::IN);
+    GPIO::gpio_set_dir(goio_pps,GPIO::Direction::IN);
 
 
     // use buzzer to make some noise for telling us that the machine is working now, quite stupid
@@ -42,6 +42,9 @@ int main()
 
 
     checkThread.join();
+
+    GPIO::gpio_unexport(gpio_check);
+    GPIO::gpio_unexport(goio_pps);
 
     return 0;
 
