@@ -26,7 +26,7 @@ std::string forgeNMEAMeaage(const tm& time)
     float gHeight= 55.2;
 
     char message[256];
-    sprintf(message,"%02d%d%d.000,%08.4f,N,%010.4f,W,%d,%d,%.2f,%.1f,M,%.1f,M,,",
+    sprintf(message,"%02d%02d%02d.000,%08.4f,N,%010.4f,W,%d,%d,%.2f,%.1f,M,%.1f,M,,",
             hour,minute,sec,N,W,lock,numSat,coeff,height,gHeight);
 
     message_GPGGA.message = message;
