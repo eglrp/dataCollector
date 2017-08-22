@@ -1,5 +1,6 @@
 dataCollector
 ======
+Jianping Li     2017.8
 
 
 About
@@ -11,3 +12,8 @@ timeSychron
 ------
 use the GPS PPS to update system time accurately
 
+
+
+collectInertial
+------
+collect inertial measurement data

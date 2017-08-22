@@ -19,7 +19,7 @@ add_library(${PROJECT_NAME} ${serial_SRCS})
 
 #TEST
 set(serial_test "OFF")
-if(serial_test STREQUAL "OFF")
+if(serial_test STREQUAL "ON")
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
     add_executable(serial_demo TEST/serial_example.cc)
     target_link_libraries(serial_demo serial)
