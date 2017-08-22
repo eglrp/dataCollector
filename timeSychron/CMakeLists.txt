@@ -7,7 +7,7 @@ set(SRC
         forgeNMEA.hpp)
 
 add_executable(timeSychron timeSychron.cpp ${SRC})
-target_link_libraries(timeSychron ${CMAKE_THREAD_LIBS_INIT} NmeaTode)
+target_link_libraries(timeSychron ${CMAKE_THREAD_LIBS_INIT} NmeaTode serial)
 
 INSTALL(TARGETS timeSychron
         RUNTIME DESTINATION bin
