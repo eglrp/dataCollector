@@ -5,18 +5,23 @@
 #include <iostream>
 #include <string.h>
 #include "messageDef.hpp"
+#include "inertialDevice.hpp"
 
 int main()
 {
-//    for (const auto& value : IMU::MIDs)
-//    {
-//        std::cout<<value.first<<" : "<<std::hex <<value.second<<std::endl;
-//    }
-    unsigned short a = 0x1520;
-    std::cout<<a<<std::endl;
-    unsigned char b[2];
-    memcpy(&b[0],&a,sizeof(unsigned short));
-    std::cout<<(int)b[1]<<std::endl;
+    IMU::InertialDivice device("/dev/ttyUSB0");
+    unsigned char messageID;
+    std::vector<unsigned char> data;
+    while(1)
+    {
+        if(!device.read_msg(messageID,data))
+        {
+            continue;
+        }
+        std::cout<<"messageId :"<<int (messageID)<<std::endl;
+        device.parse_MTData2(data);
+    }
+
 
     return 0;
 }

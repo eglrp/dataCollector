@@ -18,7 +18,7 @@ namespace IMU{
             {0x21, "Invalid parameter"}
     };
 /// Values for the message id (MID)
-    const std::map<std::string,unsigned char> MIDs = {
+    std::map<std::string,unsigned char> MIDs = {
             /// Error message, 1 data byte
             {"Error" , 0x42},
             /// State MID
@@ -132,6 +132,22 @@ namespace IMU{
             {"SetNoRotation", 0x22}
     };
 
+    std::map<std::string,unsigned short> XDIGroup = {
+            {"Temperature"				, 0x0800},
+            {"Timestamp"				, 0x1000},
+            {"OrientationData"			, 0x2000},
+            {"Pressure"				, 0x3000},
+            {"Acceleration"			, 0x4000},
+            {"Position"				, 0x5000},
+            {"AngularVelocity"	    , 0x8000},
+            {"GNSS"					, 0x7000},
+            {"SensorComponentReadout", 0xA000},
+            {"AnalogIn"				, 0xB000},
+            {"Magnetic"				, 0xC000},
+            {"Velocity"				, 0xD000},
+            {"Status"			    , 0xE000}
+    };
+
     std::string getName(int value)
     {
         /// Return the name of the first found member of class cls with given
@@ -156,6 +172,17 @@ namespace IMU{
         } else{
             return "unknown MID";
         }
+    }
+
+    std::string getMDIGroupName(unsigned short value)
+    {
+        for (const auto& item : XDIGroup) {
+            if (item.second == value)
+            {
+                return item.first;
+            }
+        }
+        return "";
     }
 
 }
