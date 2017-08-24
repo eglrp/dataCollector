@@ -9,8 +9,46 @@
 #include <memory>
 #include <sys/time.h>
 #include <algorithm>
+#include <ostream>
+#include <istream>
 
 namespace IMU{
+    struct InertialData{
+        //timeStamp
+        unsigned short packetCount;
+        //Sample Time Fine
+        unsigned long fineSampleData;
+        //Acceleration
+        double accX,accY,accZ;
+        //freeAcceleration
+        double freeAccX,freeAccY,freeAccZ;
+        //gyro
+        double gyroX,gyroY,gyroZ;
+        //Status word
+        unsigned long statusWord;
+
+        void write(std::ostream& os)
+        {
+            os.write(reinterpret_cast<char*> (&packetCount), sizeof(unsigned short));
+            os.write(reinterpret_cast<char*> (&fineSampleData), sizeof(unsigned long));
+            os.write(reinterpret_cast<char*> (&accX), sizeof(double));
+            os.write(reinterpret_cast<char*> (&accY), sizeof(double));
+            os.write(reinterpret_cast<char*> (&accZ), sizeof(double));
+            os.write(reinterpret_cast<char*> (&freeAccX), sizeof(double));
+            os.write(reinterpret_cast<char*> (&freeAccY), sizeof(double));
+            os.write(reinterpret_cast<char*> (&freeAccZ), sizeof(double));
+            os.write(reinterpret_cast<char*> (&gyroX), sizeof(double));
+            os.write(reinterpret_cast<char*> (&gyroY), sizeof(double));
+            os.write(reinterpret_cast<char*> (&gyroZ), sizeof(double));
+            os.write(reinterpret_cast<char*> (&statusWord), sizeof(unsigned long));
+        }
+    };
+
+    std::ostream& operator << (std::ostream& os, InertialData& data)
+    {
+        data.write(os);
+        return os;
+    }
     class InertialDivice{
     public:
         InertialDivice(std::string port, int baudRate=460800, uint32_t timeOut=1000)
@@ -171,11 +209,9 @@ namespace IMU{
                 {
                     parseStatus(dataId,values);
                 }
-
-
             }
         }
-
+        InertialData m_inertialData;
 
     private:
         bool waitFor(int size = 1)
@@ -215,12 +251,14 @@ namespace IMU{
             {
                 unsigned short result;
                 parseNumber(&values[0],result);
-                std::cout<<"Packet Counter: "<<result<<std::endl;
+                //std::cout<<"Packet Counter: "<<result<<std::endl;
+                m_inertialData.packetCount = result;
             } else if((dataID&0x00F0) == 0x60) //Sample Time Fine //unsigned long
             {
                 unsigned long result;
                 parseNumber(&values[0],result);
-                std::cout<<"Sample Time Fine: "<<result<<std::endl;
+                //std::cout<<"Sample Time Fine: "<<result<<std::endl;
+                m_inertialData.fineSampleData = result;
             } else{
                 std::cout<<"useless message"<<std::endl;
             }
@@ -237,6 +275,7 @@ namespace IMU{
                 parseNumber(&values[0+ sizeof(double)],dvY);
                 parseNumber(&values[0+ 2*sizeof(double)],dvZ);
                 std::cout<<"dvx: "<<dvX<<", dvy: "<<dvY<<", dvz: "<<dvZ<<std::endl;
+                //not used yet
             }
             else if ((dataID&0x00F0) == 0x20)//Acceleration
             {
@@ -244,7 +283,10 @@ namespace IMU{
                 parseNumber(&values[0],accX);
                 parseNumber(&values[0+ sizeof(double)],accY);
                 parseNumber(&values[0+ 2*sizeof(double)],accZ);
-                std::cout<<"accx: "<<accX<<", accy: "<<accY<<", accz: "<<accZ<<std::endl;
+                //std::cout<<"accx: "<<accX<<", accy: "<<accY<<", accz: "<<accZ<<std::endl;
+                m_inertialData.accX = accX;
+                m_inertialData.accY = accY;
+                m_inertialData.accZ = accZ;
             }
             else if ((dataID&0x00F0) == 0x30)//Free Acceleration
             {
@@ -252,7 +294,10 @@ namespace IMU{
                 parseNumber(&values[0],free_accX);
                 parseNumber(&values[0+ sizeof(double)],free_accY);
                 parseNumber(&values[0+ 2*sizeof(double)],free_accZ);
-                std::cout<<"free_accx: "<<free_accX<<", free_accy: "<<free_accY<<", free_accz: "<<free_accZ<<std::endl;
+                //std::cout<<"free_accx: "<<free_accX<<", free_accy: "<<free_accY<<", free_accz: "<<free_accZ<<std::endl;
+                m_inertialData.freeAccX = free_accX;
+                m_inertialData.freeAccY = free_accY;
+                m_inertialData.freeAccZ = free_accZ;
             }
             else{
                 std::cout<<"useless information\n";
@@ -270,6 +315,7 @@ namespace IMU{
                 parseNumber(&values[0+ 2*sizeof(double)],dq3);
                 parseNumber(&values[0+ 3*sizeof(double)],dq4);
                 std::cout<<"dq1: "<<dq1<<", dq2: "<<dq2<<", dq3: "<<dq3<<", dq4: "<<dq4<<std::endl;
+                //not used yet
             }
             else if ((dataID&0x00F0) == 0x20)//Rate of Turn
             {
@@ -278,6 +324,9 @@ namespace IMU{
                 parseNumber(&values[0+ sizeof(double)],gyrY);
                 parseNumber(&values[0+ 2*sizeof(double)],gyrZ);
                 std::cout<<"gyrX: "<<gyrX<<", gyrY: "<<gyrY<<", gyrZ: "<<gyrZ<<std::endl;
+                m_inertialData.gyroX = gyrX;
+                m_inertialData.gyroY = gyrY;
+                m_inertialData.gyroZ = gyrZ;
             }else{
                 std::cout<<"useless information\n";
             }
@@ -294,7 +343,8 @@ namespace IMU{
             {
                 unsigned long stateWord;
                 parseNumber(&values[0],stateWord);
-                std::cout<<"state word: "<<stateWord<<std::endl;
+                //std::cout<<"state word: "<<stateWord<<std::endl;
+                m_inertialData.statusWord = stateWord;
             }
             else if ((dataID&0x00F0) == 0x40)//RSSI
             {
@@ -306,13 +356,9 @@ namespace IMU{
                 std::cout<<"useless information\n";
             }
         }
-
-
-
-
-
         std::shared_ptr<serial::Serial> m_pSerial;
         int m_timeOut;
+
     };
 }
 
