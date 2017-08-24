@@ -15,4 +15,4 @@ include_directories(third_parties/serial/include)
 
 add_subdirectory(timeSychron)
 add_subdirectory(collectInertial)
-
+add_subdirectory(collectImages)
