@@ -17,3 +17,9 @@ use the GPS PPS to update system time accurately
 collectInertial
 ------
 collect inertial measurement data
+
+
+
+collectImages
+------
+collect images with Flea3
