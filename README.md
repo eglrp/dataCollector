@@ -8,6 +8,11 @@ About
 dataCollector is a library to collect data from UAV
 
 
+common
+------
+system config
+
+
 timeSychron
 ------
 use the GPS PPS to update system time accurately
@@ -23,3 +28,6 @@ collect inertial measurement data
 collectImages
 ------
 collect images with Flea3
+
+
+for hudie :)

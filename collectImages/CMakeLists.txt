@@ -13,10 +13,10 @@ else()
 endif()
 
 add_executable(collectImages collectImages.cpp)
-target_link_libraries(collectImages ${POINTGREY_LIB})
+target_link_libraries(collectImages ${POINTGREY_LIB} common)
 
 
-set(flyTest "ON" )
+set(flyTest "OFF" )
 
 if(flyTest STREQUAL "ON")
     add_executable(flyTest TEST/flyTest.cpp)
