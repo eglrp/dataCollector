@@ -68,3 +68,12 @@ shell  测试GPIO输出驱动
 Warning!
 ------
 RK3288  GPIO 输出驱动电流能力有限，请知悉！！！max_current  <=100MA
+
+
+used GPIO DEF
+------
+IMU    synOUT    7  --- GPIO3_D6 3*32+30=126
+
+camera synIN     8  --- GPIO3_D5 3*32+29=125
+
+gps    ppsout    10 --- GPIO3_D4 3*32+28=124

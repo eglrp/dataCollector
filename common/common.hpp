@@ -15,6 +15,7 @@ namespace common{
     struct sysConfig{
         std::string imageFolderPath;
         std::string inertialPath;
+        std::string IMUport; //default is /dev/ttyUSB0
         bool bgood;
 
         template <class Archive>
@@ -22,6 +23,7 @@ namespace common{
         {
             ar(  cereal::make_nvp("imageFolderPath",imageFolderPath),
                  cereal::make_nvp("inertialPath",inertialPath),
+                 cereal::make_nvp("IMU_port",IMUport),
                  cereal::make_nvp("bgood",bgood));
         }
     };

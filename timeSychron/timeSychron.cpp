@@ -13,39 +13,97 @@
 
 //serial
 #include <serial/serial.h>
-
+#include <fstream>
 
 
 int main()
 {
+
     bool bStop = false;
+    std::ofstream ofsCameraTime("./cameraTime.txt");
 
     /// register all the gpio
-    //we use I2S0_SDO1/GPIO3_D6 for output check
+    //we use I2S0_SDO1/GPIO3_D6 for IMU synOUT
     //3x32+30 = 126
-    const int gpio_check = 126;
-    GPIO::gpio_export(gpio_check);
-    GPIO::gpio_set_dir(gpio_check,GPIO::Direction::OUT);
+    const int gpio_IMU = 126;
+    GPIO::gpio_export(gpio_IMU);
+    GPIO::gpio_set_dir(gpio_IMU,GPIO::Direction::IN);
 
-    //we use I2S0_SDO2/GPIO3_D5 for output the GPS PPS
-    //3x32+29 = 125
-    const int goio_pps = 125;
+    bool bSetHighGPIOCamera(false);
+    std::mutex mutexSetCameraGPIO;
+    //0. a thread for receive IMUsynGpio
+    unsigned int gpioIMUvalue(0);
+    unsigned int imuCount(0);
+    std::function<void(void)> imuSynFunction = [&](void)->void {
+        while(!bStop){
+            unsigned int temp_gpioIMUvalue;
+            GPIO::gpio_get_value(gpio_IMU,&temp_gpioIMUvalue);
+            if(temp_gpioIMUvalue == 1 && gpioIMUvalue == 0){
+                imuCount++;
+            }
+            if(imuCount == 4)
+            {
+                mutexSetCameraGPIO.lock();
+                bSetHighGPIOCamera = true;
+                mutexSetCameraGPIO.unlock();
+                imuCount == 0;
+            }
+        }
+
+    };
+    std::thread imuSynThread(imuSynFunction);
+
+    //we use GPIO3_D5 for output camera trigger
+    //3*32+29 = 125
+    const int goio_camera = 125;
+    GPIO::gpio_export(goio_camera);
+    GPIO::gpio_set_dir(goio_camera,GPIO::Direction::OUT);
+
+    //0. a thread for trigger camera
+    std::function<void(void)> cameraFunction = [&](void)->void {
+        while(!bStop){
+            if(bSetHighGPIOCamera)
+            {
+                GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
+                timeval tv;
+                gettimeofday(&tv,NULL);
+                //wait for 10 us to guarantee the GPIO is set
+                std::this_thread::sleep_for(std::chrono::microseconds(100));
+                mutexSetCameraGPIO.lock();
+                bSetHighGPIOCamera = false;
+                mutexSetCameraGPIO.unlock();
+                ofsCameraTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
+                //test
+                std::cout<<"camera triggered at:"<<tv.tv_usec<<std::endl;
+                ofsCameraTime.flush();
+                GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
+            }
+
+        }
+
+    };
+    std::thread cameraTriggerThread(cameraFunction);
+
+
+
+//    // use a led to telling us that the machine is working now, quite stupid
+//    std::function<void(void)> checkFunction = [&](void)->void{
+//        while (!bStop)
+//        {
+//            GPIO::gpio_set_value(gpio_check,GPIO::Pin::HIGH);
+//            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//            GPIO::gpio_set_value(gpio_check,GPIO::Pin::LOW);
+//            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//        }
+//    };
+//    std::thread checkThread(checkFunction);
+
+
+    //we use I2S0_SDI1/GPIO3_D4 for output the GPS PPS
+    //3x32+28 = 124
+    const int goio_pps = 124;
     GPIO::gpio_export(goio_pps);
     GPIO::gpio_set_dir(goio_pps,GPIO::Direction::OUT);
-
-
-    // use a led to telling us that the machine is working now, quite stupid
-    std::function<void(void)> checkFunction = [&](void)->void{
-        while (!bStop)
-        {
-            GPIO::gpio_set_value(gpio_check,GPIO::Pin::HIGH);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            GPIO::gpio_set_value(gpio_check,GPIO::Pin::LOW);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        }
-    };
-    std::thread checkThread(checkFunction);
-
 
     /// output the pps signal and nmea
     bool bSetHighGPIO(false),bSetLowGPIO(false);
@@ -93,7 +151,7 @@ int main()
             if(bSetHighGPIO)
             {
                 //set high gpio
-                std::cout<<"set high gpio"<<std::endl;
+                //std::cout<<"set high gpio"<<std::endl;
                 GPIO::gpio_set_value(goio_pps,GPIO::Pin::HIGH);
                 //wait for 10 us to guarantee the GPIO is set
                 std::this_thread::sleep_for(std::chrono::microseconds(1000));
@@ -112,7 +170,7 @@ int main()
             if(bSetLowGPIO)
             {
                 //set low gpio
-                std::cout<<"set low"<<std::endl;
+                //std::cout<<"set low"<<std::endl;
                 GPIO::gpio_set_value(goio_pps,GPIO::Pin::LOW);
                 mutexHighGPIO.lock();
                 bSetLowGPIO = false;
@@ -125,13 +183,13 @@ int main()
 
     timingThread.join();
     outPutGPIOThread.join();
-    checkThread.join();
+    //checkThread.join();
 
     std::cin.ignore(1024,'x');
     bStop = true;
 
 //  release gpio
-    GPIO::gpio_unexport(gpio_check);
+    GPIO::gpio_unexport(gpio_IMU);
     GPIO::gpio_unexport(goio_pps);
 
     return 0;

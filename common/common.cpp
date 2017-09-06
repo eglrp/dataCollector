@@ -22,6 +22,7 @@ bool common::readConfig(common::sysConfig& config) {
     } else{// create a default file
         std::cout<<"no sys config,we create a default one"<<std::endl;
         config.bgood = false;
+        config.IMUport = "/dev/ttyUSB0";
         std::ofstream ofs(sysconfigFile);
         if (!ofs.is_open())
         {

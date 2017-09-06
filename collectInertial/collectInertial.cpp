@@ -9,6 +9,8 @@
 #include <fstream>
 #include <common.hpp>
 
+
+
 int main()
 {
     //load sysconfig
@@ -32,5 +34,12 @@ int main()
         device.parse_MTData2(data);
         ofs << device.m_inertialData;
     }
+
+    //test
+    {
+
+    }
+
+
     return 0;
 }
