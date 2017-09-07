@@ -39,10 +39,9 @@ int main()
             unsigned int temp_gpioIMUvalue;
             GPIO::gpio_get_value(gpio_IMU,&temp_gpioIMUvalue);
             if(temp_gpioIMUvalue == 1 && gpioIMUvalue == 0){
-                std::cout<<"receive imu trigger here"<<std::endl;
                 imuCount++;
             }
-            if(imuCount == 4)
+            if(imuCount == 20)
             {
                 mutexSetCameraGPIO.lock();
                 bSetHighGPIOCamera = true;
