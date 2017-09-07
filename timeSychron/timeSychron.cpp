@@ -21,6 +21,7 @@ int main()
 
     bool bStop = false;
     std::ofstream ofsCameraTime("./cameraTime.txt");
+    std::ofstream ofsIMUTime("./imuTime.txt");
 
     /// register all the gpio
     //we use I2S0_SDO1/GPIO3_D6 for IMU synOUT
@@ -32,7 +33,7 @@ int main()
     bool bSetHighGPIOCamera(false);
     std::mutex mutexSetCameraGPIO;
     //0. a thread for receive IMUsynGpio
-    unsigned int gpioIMUvalue(0);
+    unsigned int gpioIMUvalue(9999);
     unsigned int imuCount(0);
     std::function<void(void)> imuSynFunction = [&](void)->void {
         while(!bStop){
@@ -40,14 +41,19 @@ int main()
             GPIO::gpio_get_value(gpio_IMU,&temp_gpioIMUvalue);
             if(temp_gpioIMUvalue == 1 && gpioIMUvalue == 0){
                 imuCount++;
+                timeval tv;
+                gettimeofday(&tv,NULL);
+                ofsIMUTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
             }
             if(imuCount == 20)
             {
                 mutexSetCameraGPIO.lock();
                 bSetHighGPIOCamera = true;
                 mutexSetCameraGPIO.unlock();
-                imuCount == 0;
+                imuCount = 0;
+                ofsIMUTime.flush();
             }
+            gpioIMUvalue = temp_gpioIMUvalue;
         }
 
     };
