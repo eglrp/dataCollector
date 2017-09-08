@@ -23,6 +23,11 @@ bool common::readConfig(common::sysConfig& config) {
         std::cout<<"no sys config,we create a default one"<<std::endl;
         config.bgood = false;
         config.IMUport = "/dev/ttyUSB0";
+        config.IMU_triggerTimePath = std::string (sataFolderPath) + "imuTriggerTime.txt";
+        config.cameraTimePath = std::string (sataFolderPath) + "cameraTime.txt";
+        config.IMU_dataTimePath = std::string (sataFolderPath) + "imuDataTime.txt";
+        config.inertialPath = std::string (sataFolderPath) + "imuData.dat";
+        config.imageFolderPath = std::string (sataFolderPath) + "image/";
         std::ofstream ofs(sysconfigFile);
         if (!ofs.is_open())
         {

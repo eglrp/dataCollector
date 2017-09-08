@@ -15,13 +15,33 @@
 #include <serial/serial.h>
 #include <fstream>
 
+#include "common.hpp"
+
 
 int main()
 {
 
+    //load sysconfig
+    common::sysConfig config;
+    if(!common::readConfig(config))
+    {
+        std::cout<<"read config failed\n";
+        return -1;
+    }
+
     bool bStop = false;
-    std::ofstream ofsCameraTime("./cameraTime.txt");
-    std::ofstream ofsIMUTime("./imuTime.txt");
+    std::ofstream ofsCameraTime(config.cameraTimePath);
+    std::ofstream ofsIMUTime(config.IMU_triggerTimePath);
+    if (ofsCameraTime.fail())
+    {
+        std::cout<<"fail to open cameraTimePath\n";
+        return 0;
+    }
+    if (ofsIMUTime.fail())
+    {
+        std::cout<<"fail to open IMU_triggerTimePath\n";
+        return 0;
+    }
 
     /// register all the gpio
     //we use I2S0_SDO1/GPIO3_D6 for IMU synOUT
@@ -55,9 +75,8 @@ int main()
             }
             gpioIMUvalue = temp_gpioIMUvalue;
         }
-
     };
-    std::thread imuSynThread(imuSynFunction);
+
 
     //we use GPIO3_D5 for output camera trigger
     //3*32+29 = 125
@@ -89,7 +108,7 @@ int main()
 
     };
     std::thread cameraTriggerThread(cameraFunction);
-
+    std::thread imuSynThread(imuSynFunction);
 
 
 //    // use a led to telling us that the machine is working now, quite stupid

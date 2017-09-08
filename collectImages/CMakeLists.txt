@@ -22,3 +22,8 @@ if(flyTest STREQUAL "ON")
     add_executable(flyTest TEST/flyTest.cpp)
     target_link_libraries(flyTest ${POINTGREY_LIB})
 endif()
+
+INSTALL(TARGETS collectImages
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        )
