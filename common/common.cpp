@@ -28,6 +28,7 @@ bool common::readConfig(common::sysConfig& config) {
         config.IMU_dataTimePath = std::string (sataFolderPath) + "imuDataTime.txt";
         config.inertialPath = std::string (sataFolderPath) + "imuData.dat";
         config.imageFolderPath = std::string (sataFolderPath) + "image/";
+        config.laser_dataPath = std::string (sataFolderPath) + "laser.dat";
         std::ofstream ofs(sysconfigFile);
         if (!ofs.is_open())
         {

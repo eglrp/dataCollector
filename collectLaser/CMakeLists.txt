@@ -7,6 +7,11 @@ target_link_libraries(collectLaser
         PacketDriver
         PacketDecoder
         pcap
+        common
+        )
+
+add_executable(parsingLaserData parsingLaserData.cpp)
+target_link_libraries(parsingLaserData
         )
 
 INSTALL(TARGETS collectLaser
