@@ -13,3 +13,6 @@ INSTALL(TARGETS collectLaser
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         )
+
+FILE(INSTALL ../third_parties/VelodyneHDL/16db.xml
+        DESTINATION .)

@@ -3,12 +3,8 @@
 //
 
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include "PacketDriver.h"
 #include "PacketDecoder.h"
-#include <boost/shared_ptr.hpp>
-#include <deque>
 #include <fstream>
 
 using namespace std;
@@ -26,18 +22,20 @@ int main()
     std::deque<PacketDecoder::HDLFrame> frames;
     PacketDecoder::HDLFrame latest_frame;
 
-    int c = 0;
-    while (c<1000) {
+    while (1) {
         driver.GetPacket(data, dataLength);
+        timeval tv;
+        gettimeofday(&tv,NULL);
         decoder.DecodePacket(data, dataLength);
         frames = decoder.GetFrames();
         if (decoder.GetLatestFrame(&latest_frame)) {
+            ofs<<tv.tv_sec<<" "<<tv.tv_usec<<"\n";
             for(int i = 0; i < latest_frame.x.size(); i++)
             {
-                ofs<<latest_frame.x[i]<<" "<<latest_frame.y[i]<<" "<<latest_frame.z[i]<<"\n";
+                ofs<<latest_frame.ms_from_top_of_hour[i]<<" "
+                   <<latest_frame.x[i]<<" "<<latest_frame.y[i]<<" "<<latest_frame.z[i]<<" "<<latest_frame.intensity[i]<<"\n";
             }
-            std::cout << "Number of points: " << latest_frame.x.size() << std::endl;
-            c++;
+            ofs.flush();
         }
     }
     ofs.close();
