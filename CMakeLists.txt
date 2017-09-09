@@ -13,6 +13,9 @@ include_directories(third_parties/serial/include)
 # cereal
 include_directories(third_parties/cereal/include)
 
+add_subdirectory(third_parties/VelodyneHDL)
+include_directories(third_parties/VelodyneHDL)
+
 include_directories(common)
 add_subdirectory(common)
 ##
