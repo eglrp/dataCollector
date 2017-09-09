@@ -12,7 +12,7 @@ add_subdirectory(third_parties/serial)
 include_directories(third_parties/serial/include)
 # cereal
 include_directories(third_parties/cereal/include)
-
+# velodyne
 add_subdirectory(third_parties/VelodyneHDL)
 include_directories(third_parties/VelodyneHDL)
 
@@ -23,4 +23,5 @@ add_subdirectory(common)
 add_subdirectory(timeSychron)
 add_subdirectory(collectInertial)
 add_subdirectory(collectImages)
+add_subdirectory(collectLaser)
 
