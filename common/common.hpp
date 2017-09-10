@@ -17,7 +17,6 @@ namespace common{
         std::string cameraTimePath;
         std::string inertialPath;
         std::string IMUport; //default is /dev/ttyUSB0
-        std::string IMU_dataTimePath;
         std::string IMU_triggerTimePath;
         std::string laser_dataPath;
         bool bgood;
@@ -29,7 +28,6 @@ namespace common{
                  cereal::make_nvp("cameraTimePath",cameraTimePath),
                  cereal::make_nvp("inertialPath",inertialPath),
                  cereal::make_nvp("IMU_port",IMUport),
-                 cereal::make_nvp("IMU_dataTimePath",IMU_dataTimePath),
                  cereal::make_nvp("IMU_triggerTimePath",IMU_triggerTimePath),
                  cereal::make_nvp("laser_dataPath",laser_dataPath),
                  cereal::make_nvp("bgood",bgood)

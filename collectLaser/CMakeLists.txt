@@ -8,6 +8,7 @@ target_link_libraries(collectLaser
         PacketDecoder
         pcap
         common
+        pthread
         )
 
 add_executable(parsingLaserData parsingLaserData.cpp)

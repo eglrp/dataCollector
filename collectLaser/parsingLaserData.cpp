@@ -17,7 +17,7 @@ int main()
         ifs.read((char*)&npts,sizeof(npts));
         //std::cout<<sec<<std::endl;
         //std::cout<<usec<<std::endl;
-        //std::cout<<npts<<std::endl;
+        std::cout<<npts<<std::endl;
         for (int i = 0; i < npts; ++i) {
             double x,y,z;
             int intense;

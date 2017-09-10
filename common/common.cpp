@@ -25,7 +25,7 @@ bool common::readConfig(common::sysConfig& config) {
         config.IMUport = "/dev/ttyUSB0";
         config.IMU_triggerTimePath = std::string (sataFolderPath) + "imuTriggerTime.txt";
         config.cameraTimePath = std::string (sataFolderPath) + "cameraTime.txt";
-        config.IMU_dataTimePath = std::string (sataFolderPath) + "imuDataTime.txt";
+        //config.IMU_dataTimePath = std::string (sataFolderPath) + "imuDataTime.txt";
         config.inertialPath = std::string (sataFolderPath) + "imuData.dat";
         config.imageFolderPath = std::string (sataFolderPath) + "image/";
         config.laser_dataPath = std::string (sataFolderPath) + "laser.dat";
