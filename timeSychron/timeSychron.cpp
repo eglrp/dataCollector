@@ -55,6 +55,7 @@ int main()
     //0. a thread for receive IMUsynGpio
     unsigned int gpioIMUvalue(9999);
     unsigned int imuCount(0);
+    int imuSynFunctionCount = 0;
     std::function<void(void)> imuSynFunction = [&](void)->void {
         while(!bStop){
             unsigned int temp_gpioIMUvalue;
@@ -71,7 +72,14 @@ int main()
                 bSetHighGPIOCamera = true;
                 mutexSetCameraGPIO.unlock();
                 imuCount = 0;
-                ofsIMUTime.flush();
+                imuSynFunctionCount++;
+                if(imuSynFunctionCount == 10)
+                {
+                    imuSynFunctionCount=0;
+                    ofsIMUTime.flush();
+                }
+
+
             }
             gpioIMUvalue = temp_gpioIMUvalue;
         }
@@ -83,6 +91,7 @@ int main()
     const int goio_camera = 125;
     GPIO::gpio_export(goio_camera);
     GPIO::gpio_set_dir(goio_camera,GPIO::Direction::OUT);
+    int cameraFunctionCount = 0;
 
     //0. a thread for trigger camera
     std::function<void(void)> cameraFunction = [&](void)->void {
@@ -100,7 +109,13 @@ int main()
                 ofsCameraTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
                 //test
                 //std::cout<<"camera triggered at:"<<tv.tv_usec<<std::endl;
-                ofsCameraTime.flush();
+                cameraFunctionCount++;
+                if(cameraFunctionCount == 10)
+                {
+                    ofsCameraTime.flush();
+                    cameraFunctionCount=0;
+                }
+
                 GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
             }
 
@@ -126,36 +141,36 @@ int main()
 
     //we use I2S0_SDI1/GPIO3_D4 for output the GPS PPS
     //3x32+28 = 124
-    const int goio_pps = 124;
-    GPIO::gpio_export(goio_pps);
-    GPIO::gpio_set_dir(goio_pps,GPIO::Direction::OUT);
-
-    /// output the pps signal and nmea
-    bool bSetHighGPIO(false),bSetLowGPIO(false);
-    std::mutex mutexHighGPIO,mutexLowGPIO;
-
-    // 1. a thread for timing
-    std::function<void(void)> timingFunction = [&](void)->void {
-        while(!bStop){
-            //get system time
-            timeval tv;
-            gettimeofday(&tv,NULL);
-            if (tv.tv_usec <= 1)// time may be not accurate enough
-            {
-                mutexHighGPIO.lock();
-                bSetHighGPIO = true;
-                mutexHighGPIO.unlock();
-            }
-            if ( tv.tv_usec - 500*1000 == 0 || tv.tv_usec - 500*1000 == 1)// time may be not accurate enough
-            {
-                mutexLowGPIO.lock();
-                bSetLowGPIO = true;
-                mutexLowGPIO.unlock();
-            }
-        }
-
-    };
-    std::thread timingThread(timingFunction);
+//    const int goio_pps = 124;
+//    GPIO::gpio_export(goio_pps);
+//    GPIO::gpio_set_dir(goio_pps,GPIO::Direction::OUT);
+//
+//    /// output the pps signal and nmea
+//    bool bSetHighGPIO(false),bSetLowGPIO(false);
+//    std::mutex mutexHighGPIO,mutexLowGPIO;
+//
+//    // 1. a thread for timing
+//    std::function<void(void)> timingFunction = [&](void)->void {
+//        while(!bStop){
+//            //get system time
+//            timeval tv;
+//            gettimeofday(&tv,NULL);
+//            if (tv.tv_usec <= 1)// time may be not accurate enough
+//            {
+//                mutexHighGPIO.lock();
+//                bSetHighGPIO = true;
+//                mutexHighGPIO.unlock();
+//            }
+//            if ( tv.tv_usec - 500*1000 == 0 || tv.tv_usec - 500*1000 == 1)// time may be not accurate enough
+//            {
+//                mutexLowGPIO.lock();
+//                bSetLowGPIO = true;
+//                mutexLowGPIO.unlock();
+//            }
+//        }
+//
+//    };
+//    std::thread timingThread(timingFunction);
 
 
 
