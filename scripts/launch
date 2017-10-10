@@ -7,6 +7,8 @@ rm -r /media/ninetripod/Samsung_T3/datacollector/
 mkdir /media/ninetripod/Samsung_T3/datacollector/
 mkdir /media/ninetripod/Samsung_T3/datacollector/image
 
+python ./checkNet.py &
+
 cd /usr/dataCollect/bin/
 /usr/dataCollect/bin/collectLaser &
 /usr/dataCollect/bin/collectImages &
