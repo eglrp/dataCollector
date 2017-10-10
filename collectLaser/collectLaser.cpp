@@ -30,6 +30,7 @@ int main()
     std::deque<PacketDecoder::HDLFrame> frames;
     PacketDecoder::HDLFrame latest_frame;
 
+    int count = 0;
     while (1) {
         driver.GetPacket(data, dataLength);
         timeval tv;
@@ -53,7 +54,13 @@ int main()
                 ofs.write((char*)(&latest_frame.z[i]),sizeof(latest_frame.z[i]));
                 ofs.write((char*)(&latest_frame.intensity[i]),sizeof(latest_frame.intensity[i]));
             }
-            ofs.flush();
+            count ++;
+            if(count == 10)
+            {
+                count = 0;
+                ofs.flush();
+            }
+
         }
     }
     ofs.close();

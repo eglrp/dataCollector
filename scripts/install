@@ -5,4 +5,4 @@ cmake -DCMAKE_INSTALL_PREFIX="/usr/dataCollect" ..
 make
 make install
 
-cp third_parties/VelodyneHDL/16db.xml /usr/dataCollect/bin
+cp ../third_parties/VelodyneHDL/16db.xml /usr/dataCollect/bin
