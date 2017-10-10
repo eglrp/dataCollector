@@ -25,6 +25,7 @@ int main()
     unsigned char messageID;
     std::vector<unsigned char> data;
     std::ofstream ofs(config.inertialPath,std::ios_base::out|std::ios_base::binary);
+    int count =0;
     while(1)
     {
         if(!device.read_msg(messageID,data))
@@ -37,6 +38,11 @@ int main()
         ofs.write((char*)(&tv.tv_usec), sizeof(tv.tv_usec));
         device.parse_MTData2(data);
         ofs << device.m_inertialData;
+        count ++;
+        if(count == 400)
+        {
+            ofs.flush();
+        }
     }
 
 
