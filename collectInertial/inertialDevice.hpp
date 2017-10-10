@@ -274,7 +274,7 @@ namespace IMU{
                 parseNumber(&values[0],dvX);
                 parseNumber(&values[0+ sizeof(double)],dvY);
                 parseNumber(&values[0+ 2*sizeof(double)],dvZ);
-                std::cout<<"dvx: "<<dvX<<", dvy: "<<dvY<<", dvz: "<<dvZ<<std::endl;
+                //std::cout<<"dvx: "<<dvX<<", dvy: "<<dvY<<", dvz: "<<dvZ<<std::endl;
                 //not used yet
             }
             else if ((dataID&0x00F0) == 0x20)//Acceleration
@@ -314,7 +314,7 @@ namespace IMU{
                 parseNumber(&values[0+ sizeof(double)],dq2);
                 parseNumber(&values[0+ 2*sizeof(double)],dq3);
                 parseNumber(&values[0+ 3*sizeof(double)],dq4);
-                std::cout<<"dq1: "<<dq1<<", dq2: "<<dq2<<", dq3: "<<dq3<<", dq4: "<<dq4<<std::endl;
+                //std::cout<<"dq1: "<<dq1<<", dq2: "<<dq2<<", dq3: "<<dq3<<", dq4: "<<dq4<<std::endl;
                 //not used yet
             }
             else if ((dataID&0x00F0) == 0x20)//Rate of Turn
@@ -323,7 +323,7 @@ namespace IMU{
                 parseNumber(&values[0],gyrX);
                 parseNumber(&values[0+ sizeof(double)],gyrY);
                 parseNumber(&values[0+ 2*sizeof(double)],gyrZ);
-                std::cout<<"gyrX: "<<gyrX<<", gyrY: "<<gyrY<<", gyrZ: "<<gyrZ<<std::endl;
+                //std::cout<<"gyrX: "<<gyrX<<", gyrY: "<<gyrY<<", gyrZ: "<<gyrZ<<std::endl;
                 m_inertialData.gyroX = gyrX;
                 m_inertialData.gyroY = gyrY;
                 m_inertialData.gyroZ = gyrZ;

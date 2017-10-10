@@ -1,8 +1,11 @@
 ifconfig eth0 192.168.1.255 netmask 255.255.255.0
 route add 192.168.1.201 eth0
 
+mount -t exfat /dev/sda1 media/ninetripod/Samsung_T3
+
 rm -r /media/ninetripod/Samsung_T3/datacollector/
 mkdir /media/ninetripod/Samsung_T3/datacollector/
+mkdir /media/ninetripod/Samsung_T3/datacollector/image
 
 cd /usr/dataCollect/bin/
 /usr/dataCollect/bin/collectLaser &

@@ -99,7 +99,7 @@ int main()
                 mutexSetCameraGPIO.unlock();
                 ofsCameraTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
                 //test
-                std::cout<<"camera triggered at:"<<tv.tv_usec<<std::endl;
+                //std::cout<<"camera triggered at:"<<tv.tv_usec<<std::endl;
                 ofsCameraTime.flush();
                 GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
             }

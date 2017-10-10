@@ -48,7 +48,7 @@ int main(int argc, char**argv)
 
         // Create a unique filename
 
-        std::cout<<"write image"<<std::endl;
+        //std::cout<<"write image"<<std::endl;
         std::ostringstream filename;
         filename << config.imageFolderPath <<image.GetTimeStamp().seconds<<"-" <<image.GetTimeStamp().microSeconds<< "-"
                  << ".jpg";
