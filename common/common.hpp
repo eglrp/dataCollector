@@ -9,7 +9,7 @@
 #include <cereal/archives/xml.hpp>
 
 #define sysconfigFile "./sysconfig.xml"
-#define sataFolderPath "/media/ninetripod/XIAOBAI/datacollector/"
+#define sataFolderPath "/media/ninetripod/Samsung_T3/datacollector/"
 
 namespace common{
     struct sysConfig{
