@@ -1,0 +1,4 @@
+pkill collectLaser
+pkill collectImages
+pkill collectInertial
+pkill timeSychron
