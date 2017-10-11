@@ -126,27 +126,34 @@ int main()
 //    imuSynThread.join();
 
     while(!bStop){
-            unsigned int temp_gpioIMUvalue;
-            GPIO::gpio_get_value(gpio_IMU,&temp_gpioIMUvalue);
-            if(temp_gpioIMUvalue == 1 && gpioIMUvalue == 0){
-                imuCount++;
-                timeval tv;
-                gettimeofday(&tv,NULL);
-                ofsIMUTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
-            }
-            if(imuCount == 40)
-            {
-                GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
-                timeval tv;
-                gettimeofday(&tv,NULL);
-                //wait for 10 us to guarantee the GPIO is set
-                std::this_thread::sleep_for(std::chrono::microseconds(100));
-                GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
-                imuCount = 0;
-                ofsIMUTime.flush();
-            }
-            gpioIMUvalue = temp_gpioIMUvalue;
+
+        unsigned int temp_gpioIMUvalue;
+        GPIO::gpio_get_value(gpio_IMU,&temp_gpioIMUvalue);
+        if(temp_gpioIMUvalue == 1 && gpioIMUvalue == 0){
+            imuCount++;
+            timeval tv;
+            gettimeofday(&tv,NULL);
+            ofsIMUTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
         }
+        if(imuCount == 40)
+        {
+            GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
+            timeval tv1;
+            gettimeofday(&tv1,NULL);
+            //wait for 10 us to guarantee the GPIO is set
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
+            GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
+            ofsCameraTime<<tv1.tv_sec<<","<<tv1.tv_usec<<"\n";
+            imuCount = 0;
+
+        }
+        gpioIMUvalue = temp_gpioIMUvalue;
+        if(imuCount == 400)
+        {
+            ofsCameraTime.flush();
+            ofsIMUTime.flush();
+        }
+    }
 
 //    // use a led to telling us that the machine is working now, quite stupid
 //    std::function<void(void)> checkFunction = [&](void)->void{
