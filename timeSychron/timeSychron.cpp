@@ -50,14 +50,82 @@ int main()
     GPIO::gpio_export(gpio_IMU);
     GPIO::gpio_set_dir(gpio_IMU,GPIO::Direction::IN);
 
-    bool bSetHighGPIOCamera(false);
-    std::mutex mutexSetCameraGPIO;
-    //0. a thread for receive IMUsynGpio
+//    bool bSetHighGPIOCamera(false);
+//    std::mutex mutexSetCameraGPIO;
+//    //0. a thread for receive IMUsynGpio
     unsigned int gpioIMUvalue(9999);
     unsigned int imuCount(0);
-    int imuSynFunctionCount = 0;
-    std::function<void(void)> imuSynFunction = [&](void)->void {
-        while(!bStop){
+//    int imuSynFunctionCount = 0;
+//    std::function<void(void)> imuSynFunction = [&](void)->void {
+//        while(!bStop){
+//            unsigned int temp_gpioIMUvalue;
+//            GPIO::gpio_get_value(gpio_IMU,&temp_gpioIMUvalue);
+//            if(temp_gpioIMUvalue == 1 && gpioIMUvalue == 0){
+//                imuCount++;
+//                timeval tv;
+//                gettimeofday(&tv,NULL);
+//                ofsIMUTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
+//            }
+//            if(imuCount == 40)
+//            {
+//                mutexSetCameraGPIO.lock();
+//                bSetHighGPIOCamera = true;
+//                mutexSetCameraGPIO.unlock();
+//                imuCount = 0;
+//                imuSynFunctionCount++;
+//                if(imuSynFunctionCount == 10)
+//                {
+//                    imuSynFunctionCount=0;
+//                    ofsIMUTime.flush();
+//                }
+//            }
+//            gpioIMUvalue = temp_gpioIMUvalue;
+//        }
+//    };
+//
+//
+//    //we use GPIO3_D5 for output camera trigger
+//    //3*32+29 = 125
+    const int goio_camera = 125;
+    GPIO::gpio_export(goio_camera);
+    GPIO::gpio_set_dir(goio_camera,GPIO::Direction::OUT);
+//    int cameraFunctionCount = 0;
+//
+//    //0. a thread for trigger camera
+//    std::function<void(void)> cameraFunction = [&](void)->void {
+//        while(!bStop){
+//            if(bSetHighGPIOCamera)
+//            {
+//                GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
+//                timeval tv;
+//                gettimeofday(&tv,NULL);
+//                //wait for 10 us to guarantee the GPIO is set
+//                std::this_thread::sleep_for(std::chrono::microseconds(100));
+//                mutexSetCameraGPIO.lock();
+//                bSetHighGPIOCamera = false;
+//                mutexSetCameraGPIO.unlock();
+//                ofsCameraTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
+//                //test
+//                //std::cout<<"camera triggered at:"<<tv.tv_usec<<std::endl;
+//                cameraFunctionCount++;
+//                if(cameraFunctionCount == 10)
+//                {
+//                    ofsCameraTime.flush();
+//                    cameraFunctionCount=0;
+//                }
+//
+//                GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
+//            }
+//
+//        }
+//
+//    };
+//    std::thread cameraTriggerThread(cameraFunction);
+//    std::thread imuSynThread(imuSynFunction);
+//
+//    imuSynThread.join();
+
+    while(!bStop){
             unsigned int temp_gpioIMUvalue;
             GPIO::gpio_get_value(gpio_IMU,&temp_gpioIMUvalue);
             if(temp_gpioIMUvalue == 1 && gpioIMUvalue == 0){
@@ -68,63 +136,17 @@ int main()
             }
             if(imuCount == 40)
             {
-                mutexSetCameraGPIO.lock();
-                bSetHighGPIOCamera = true;
-                mutexSetCameraGPIO.unlock();
-                imuCount = 0;
-                imuSynFunctionCount++;
-                if(imuSynFunctionCount == 10)
-                {
-                    imuSynFunctionCount=0;
-                    ofsIMUTime.flush();
-                }
-
-
-            }
-            gpioIMUvalue = temp_gpioIMUvalue;
-        }
-    };
-
-
-    //we use GPIO3_D5 for output camera trigger
-    //3*32+29 = 125
-    const int goio_camera = 125;
-    GPIO::gpio_export(goio_camera);
-    GPIO::gpio_set_dir(goio_camera,GPIO::Direction::OUT);
-    int cameraFunctionCount = 0;
-
-    //0. a thread for trigger camera
-    std::function<void(void)> cameraFunction = [&](void)->void {
-        while(!bStop){
-            if(bSetHighGPIOCamera)
-            {
                 GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
                 timeval tv;
                 gettimeofday(&tv,NULL);
                 //wait for 10 us to guarantee the GPIO is set
                 std::this_thread::sleep_for(std::chrono::microseconds(100));
-                mutexSetCameraGPIO.lock();
-                bSetHighGPIOCamera = false;
-                mutexSetCameraGPIO.unlock();
-                ofsCameraTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
-                //test
-                //std::cout<<"camera triggered at:"<<tv.tv_usec<<std::endl;
-                cameraFunctionCount++;
-                if(cameraFunctionCount == 10)
-                {
-                    ofsCameraTime.flush();
-                    cameraFunctionCount=0;
-                }
-
                 GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
+                imuCount = 0;
+                ofsIMUTime.flush();
             }
-
+            gpioIMUvalue = temp_gpioIMUvalue;
         }
-
-    };
-    std::thread cameraTriggerThread(cameraFunction);
-    std::thread imuSynThread(imuSynFunction);
-
 
 //    // use a led to telling us that the machine is working now, quite stupid
 //    std::function<void(void)> checkFunction = [&](void)->void{
@@ -221,7 +243,7 @@ int main()
 //    };
 //    std::thread outPutGPIOThread(outPutGPIOFunction);
 
-    timingThread.join();
+//    timingThread.join();
 //    outPutGPIOThread.join();
     //checkThread.join();
 
@@ -230,7 +252,7 @@ int main()
 
 //  release gpio
     GPIO::gpio_unexport(gpio_IMU);
-    GPIO::gpio_unexport(goio_pps);
+//    GPIO::gpio_unexport(goio_pps);
 
     return 0;
 
