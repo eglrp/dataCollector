@@ -6,8 +6,11 @@
 
 int main()
 {
-    std::ifstream ifs("./laser.dat");
+    std::string filename;
+    std::cin>>filename;
+    std::ifstream ifs(filename);
     std::ofstream ofs("pts.xyz");
+    int count = 0;
     while(ifs.good())
     {
         long int sec,usec;
@@ -17,10 +20,12 @@ int main()
         ifs.read((char*)&npts,sizeof(npts));
         //std::cout<<sec<<std::endl;
         //std::cout<<usec<<std::endl;
+        //ofs<<"start\n"<<npts<<std::endl;
         std::cout<<npts<<std::endl;
+
         for (int i = 0; i < npts; ++i) {
             double x,y,z;
-            int intense;
+            unsigned char intense;
             unsigned int time;
 
             ifs.read((char*)(&time),sizeof(time));
@@ -28,8 +33,14 @@ int main()
             ifs.read((char*)&y,sizeof(y));
             ifs.read((char*)&z,sizeof(z));
             ifs.read((char*)&intense,sizeof(intense));
-            ofs<<x<<" "<<y<<" "<<z<<std::endl;
+            if(count >= 1000 && count <= 1200)
+            {
+                ofs<<x<<" "<<y<<" "<<z<<std::endl;
+            }
+
+            //std::cout<<x<<" "<<y<<" "<<z<<std::endl;
         }
+        count ++;
     }
     ofs.close();
     return 0;
