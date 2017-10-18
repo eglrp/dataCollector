@@ -14,6 +14,16 @@
 
 namespace IMU{
     struct InertialData{
+
+        unsigned long ns;//unsigned long
+        unsigned short Year;//unsigned short
+        unsigned char Month;//unsigned char
+        unsigned char Day;//unsigned char
+        unsigned char Hour;//unsigned char
+        unsigned char Minute;//unsigned char
+        unsigned char Second;//unsigned char
+        unsigned char Flags;//unsigned char
+
         //timeStamp
         unsigned short packetCount;
         //Sample Time Fine
@@ -22,6 +32,8 @@ namespace IMU{
         double accX,accY,accZ;
         //freeAcceleration
         double freeAccX,freeAccY,freeAccZ;
+        //dv
+
         //gyro
         double gyroX,gyroY,gyroZ;
         //Status word
@@ -29,6 +41,14 @@ namespace IMU{
 
         void write(std::ostream& os)
         {
+            os.write(reinterpret_cast<char*> (&ns), sizeof(unsigned long));//unsigned long
+            os.write(reinterpret_cast<char*> (&Year), sizeof(unsigned short));//unsigned short
+            os.write(reinterpret_cast<char*> (&Month), sizeof(unsigned char));//unsigned char
+            os.write(reinterpret_cast<char*> (&Day), sizeof(unsigned char));//unsigned char
+            os.write(reinterpret_cast<char*> (&Hour), sizeof(unsigned char));//unsigned char
+            os.write(reinterpret_cast<char*> (&Minute), sizeof(unsigned char));//unsigned char
+            os.write(reinterpret_cast<char*> (&Second), sizeof(unsigned char));//unsigned char
+            os.write(reinterpret_cast<char*> (&Flags), sizeof(unsigned char));//unsigned char
             os.write(reinterpret_cast<char*> (&packetCount), sizeof(unsigned short));
             os.write(reinterpret_cast<char*> (&fineSampleData), sizeof(unsigned long));
             os.write(reinterpret_cast<char*> (&accX), sizeof(double));
@@ -42,12 +62,42 @@ namespace IMU{
             os.write(reinterpret_cast<char*> (&gyroZ), sizeof(double));
             os.write(reinterpret_cast<char*> (&statusWord), sizeof(unsigned long));
         }
+
+        void read(std::istream& is)
+        {
+            is.read(reinterpret_cast<char*> (&ns), sizeof(unsigned long));//unsigned long
+            is.read(reinterpret_cast<char*> (&Year), sizeof(unsigned short));//unsigned short
+            is.read(reinterpret_cast<char*> (&Month), sizeof(unsigned char));//unsigned char
+            is.read(reinterpret_cast<char*> (&Day), sizeof(unsigned char));//unsigned char
+            is.read(reinterpret_cast<char*> (&Hour), sizeof(unsigned char));//unsigned char
+            is.read(reinterpret_cast<char*> (&Minute), sizeof(unsigned char));//unsigned char
+            is.read(reinterpret_cast<char*> (&Second), sizeof(unsigned char));//unsigned char
+            is.read(reinterpret_cast<char*> (&Flags), sizeof(unsigned char));//unsigned char
+            is.read(reinterpret_cast<char*> (&packetCount), sizeof(unsigned short));
+            is.read(reinterpret_cast<char*> (&fineSampleData), sizeof(unsigned long));
+            is.read(reinterpret_cast<char*> (&accX), sizeof(double));
+            is.read(reinterpret_cast<char*> (&accY), sizeof(double));
+            is.read(reinterpret_cast<char*> (&accZ), sizeof(double));
+            is.read(reinterpret_cast<char*> (&freeAccX), sizeof(double));
+            is.read(reinterpret_cast<char*> (&freeAccY), sizeof(double));
+            is.read(reinterpret_cast<char*> (&freeAccZ), sizeof(double));
+            is.read(reinterpret_cast<char*> (&gyroX), sizeof(double));
+            is.read(reinterpret_cast<char*> (&gyroY), sizeof(double));
+            is.read(reinterpret_cast<char*> (&gyroZ), sizeof(double));
+            is.read(reinterpret_cast<char*> (&statusWord), sizeof(unsigned long));
+        }
     };
 
     std::ostream& operator << (std::ostream& os, InertialData& data)
     {
         data.write(os);
         return os;
+    }
+
+    std::istream& operator >> (std::istream& is, InertialData& data)
+    {
+        data.read(is);
+        return is;
     }
     class InertialDivice{
     public:
@@ -67,7 +117,7 @@ namespace IMU{
             timeval tv_start;;
             gettimeofday(&tv_start,NULL);
             long diffTime(0);//ms
-            while (diffTime<m_timeOut)
+            while (diffTime < m_timeOut)
             {
                 timeval tv_now;
                 gettimeofday(&tv_now,NULL);
@@ -246,8 +296,55 @@ namespace IMU{
 
         void parseTimestamp(const unsigned short& dataID, const std::vector<unsigned char>& values)
         {
+//            if (data_id&0x00F0) == 0x10:	# UTC Time
+//            o['ns'], o['Year'], o['Month'], o['Day'], o['Hour'],\
+//						o['Minute'], o['Second'], o['Flags'] =\
+//						struct.unpack('!LHBBBBBB', content)
 
-            if((dataID&0x00F0) == 0x20) //Packet Counter //unsigned short
+            if((dataID&0x00F0) == 0x10)// UTC time
+            {
+                int step = 0;
+                unsigned long ns;//unsigned long
+                parseNumber(&values[step],ns);
+                m_inertialData.ns = ns;
+                step += sizeof(ns);
+
+                unsigned short Year;//unsigned short
+                parseNumber(&values[step],Year);
+                m_inertialData.Year = Year;
+                step+= sizeof(Year);
+
+                unsigned char Month;//unsigned char
+                parseNumber(&values[step],Month);
+                m_inertialData.Month = Month;
+                step+= sizeof(Month);
+
+                unsigned char Day;//unsigned char
+                parseNumber(&values[step],Day);
+                m_inertialData.Day = Day;
+                step+= sizeof(Day);
+
+                unsigned char Hour;//unsigned char
+                parseNumber(&values[step],Hour);
+                m_inertialData.Hour = Hour;
+                step+= sizeof(Hour);
+
+                unsigned char Minute;//unsigned char
+                parseNumber(&values[step],Minute);
+                m_inertialData.Minute = Minute;
+                step+= sizeof(Minute);
+
+                unsigned char Second;//unsigned char
+                parseNumber(&values[step],Second);
+                m_inertialData.Second = Second;
+                step+= sizeof(Second);
+
+                unsigned char Flags;//unsigned char
+                parseNumber(&values[step],Flags);
+                m_inertialData.Flags = Flags;
+                step+= sizeof(Flags);
+            }
+            else if((dataID&0x00F0) == 0x20) //Packet Counter //unsigned short
             {
                 unsigned short result;
                 parseNumber(&values[0],result);
