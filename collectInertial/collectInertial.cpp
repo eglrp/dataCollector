@@ -34,8 +34,8 @@ int main()
         }
         timeval tv;
         gettimeofday(&tv,NULL);
-//        ofs.write((char*)(&tv.tv_sec), sizeof(tv.tv_sec));
-//        ofs.write((char*)(&tv.tv_usec), sizeof(tv.tv_usec));
+        ofs.write((char*)(&tv.tv_sec), sizeof(tv.tv_sec));
+        ofs.write((char*)(&tv.tv_usec), sizeof(tv.tv_usec));
         device.parse_MTData2(data);
         ofs << device.m_inertialData;
         count ++;

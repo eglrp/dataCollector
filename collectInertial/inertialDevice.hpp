@@ -15,7 +15,7 @@
 namespace IMU{
     struct InertialData{
 
-        unsigned long ns;//unsigned long
+        unsigned int ns;//unsigned int
         unsigned short Year;//unsigned short
         unsigned char Month;//unsigned char
         unsigned char Day;//unsigned char
@@ -27,7 +27,7 @@ namespace IMU{
         //timeStamp
         unsigned short packetCount;
         //Sample Time Fine
-        unsigned long fineSampleData;
+        unsigned int fineSampleData;
         //Acceleration
         double accX,accY,accZ;
         //freeAcceleration
@@ -37,11 +37,11 @@ namespace IMU{
         //gyro
         double gyroX,gyroY,gyroZ;
         //Status word
-        unsigned long statusWord;
+        unsigned int statusWord;
 
         void write(std::ostream& os)
         {
-            os.write(reinterpret_cast<char*> (&ns), sizeof(unsigned long));//unsigned long
+            os.write(reinterpret_cast<char*> (&ns), sizeof(unsigned int));//unsigned int
             os.write(reinterpret_cast<char*> (&Year), sizeof(unsigned short));//unsigned short
             os.write(reinterpret_cast<char*> (&Month), sizeof(unsigned char));//unsigned char
             os.write(reinterpret_cast<char*> (&Day), sizeof(unsigned char));//unsigned char
@@ -50,7 +50,7 @@ namespace IMU{
             os.write(reinterpret_cast<char*> (&Second), sizeof(unsigned char));//unsigned char
             os.write(reinterpret_cast<char*> (&Flags), sizeof(unsigned char));//unsigned char
             os.write(reinterpret_cast<char*> (&packetCount), sizeof(unsigned short));
-            os.write(reinterpret_cast<char*> (&fineSampleData), sizeof(unsigned long));
+            os.write(reinterpret_cast<char*> (&fineSampleData), sizeof(unsigned int));
             os.write(reinterpret_cast<char*> (&accX), sizeof(double));
             os.write(reinterpret_cast<char*> (&accY), sizeof(double));
             os.write(reinterpret_cast<char*> (&accZ), sizeof(double));
@@ -60,12 +60,12 @@ namespace IMU{
             os.write(reinterpret_cast<char*> (&gyroX), sizeof(double));
             os.write(reinterpret_cast<char*> (&gyroY), sizeof(double));
             os.write(reinterpret_cast<char*> (&gyroZ), sizeof(double));
-            os.write(reinterpret_cast<char*> (&statusWord), sizeof(unsigned long));
+            os.write(reinterpret_cast<char*> (&statusWord), sizeof(unsigned int));
         }
 
         void read(std::istream& is)
         {
-            is.read(reinterpret_cast<char*> (&ns), sizeof(unsigned long));//unsigned long
+            is.read(reinterpret_cast<char*> (&ns), sizeof(unsigned int));//unsigned int
             is.read(reinterpret_cast<char*> (&Year), sizeof(unsigned short));//unsigned short
             is.read(reinterpret_cast<char*> (&Month), sizeof(unsigned char));//unsigned char
             is.read(reinterpret_cast<char*> (&Day), sizeof(unsigned char));//unsigned char
@@ -74,7 +74,7 @@ namespace IMU{
             is.read(reinterpret_cast<char*> (&Second), sizeof(unsigned char));//unsigned char
             is.read(reinterpret_cast<char*> (&Flags), sizeof(unsigned char));//unsigned char
             is.read(reinterpret_cast<char*> (&packetCount), sizeof(unsigned short));
-            is.read(reinterpret_cast<char*> (&fineSampleData), sizeof(unsigned long));
+            is.read(reinterpret_cast<char*> (&fineSampleData), sizeof(unsigned int));
             is.read(reinterpret_cast<char*> (&accX), sizeof(double));
             is.read(reinterpret_cast<char*> (&accY), sizeof(double));
             is.read(reinterpret_cast<char*> (&accZ), sizeof(double));
@@ -84,7 +84,7 @@ namespace IMU{
             is.read(reinterpret_cast<char*> (&gyroX), sizeof(double));
             is.read(reinterpret_cast<char*> (&gyroY), sizeof(double));
             is.read(reinterpret_cast<char*> (&gyroZ), sizeof(double));
-            is.read(reinterpret_cast<char*> (&statusWord), sizeof(unsigned long));
+            is.read(reinterpret_cast<char*> (&statusWord), sizeof(unsigned int));
         }
     };
 
@@ -304,7 +304,7 @@ namespace IMU{
             if((dataID&0x00F0) == 0x10)// UTC time
             {
                 int step = 0;
-                unsigned long ns;//unsigned long
+                unsigned int ns;//unsigned int
                 parseNumber(&values[step],ns);
                 m_inertialData.ns = ns;
                 step += sizeof(ns);
@@ -350,9 +350,9 @@ namespace IMU{
                 parseNumber(&values[0],result);
                 //std::cout<<"Packet Counter: "<<result<<std::endl;
                 m_inertialData.packetCount = result;
-            } else if((dataID&0x00F0) == 0x60) //Sample Time Fine //unsigned long
+            } else if((dataID&0x00F0) == 0x60) //Sample Time Fine //unsigned int
             {
-                unsigned long result;
+                unsigned int result;
                 parseNumber(&values[0],result);
                 //std::cout<<"Sample Time Fine: "<<result<<std::endl;
                 m_inertialData.fineSampleData = result;
@@ -438,7 +438,7 @@ namespace IMU{
             }
             else if ((dataID&0x00F0) == 0x20)//Status Word
             {
-                unsigned long stateWord;
+                unsigned int stateWord;
                 parseNumber(&values[0],stateWord);
                 //std::cout<<"state word: "<<stateWord<<std::endl;
                 m_inertialData.statusWord = stateWord;
