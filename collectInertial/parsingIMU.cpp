@@ -16,13 +16,11 @@ int main()
     std::ofstream ofs("imu.txt");
     while(ifs.good())
     {
-        timeval tv;
-        gettimeofday(&tv,NULL);
-        ifs.read((char*)(&tv.tv_sec), sizeof(tv.tv_sec));
-        ifs.read((char*)(&tv.tv_usec), sizeof(tv.tv_usec));
-
         IMU::InertialData inertialData;
         ifs >> inertialData;
+        std::cout<<inertialData.Year<<" "<<inertialData.Month<<" "<<inertialData.Day<<"\n";
+        std::cout<<inertialData.Hour<<" "<<inertialData.Minute<<" "<<inertialData.Second<<"\n";
+        std::cout<<inertialData.ns<<"\n";
         std::cout<<inertialData.accX<<" "<<inertialData.accY<<" "<<inertialData.accZ<<"\n";
 
     }

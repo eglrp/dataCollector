@@ -135,7 +135,7 @@ int main()
             gettimeofday(&tv,NULL);
             ofsIMUTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
         }
-        if(imuCount % 40 == 0)
+        if(imuCount % 20 == 0)
         {
             GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
             timeval tv1;
