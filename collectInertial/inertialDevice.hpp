@@ -107,6 +107,7 @@ namespace IMU{
             m_pSerial->flushInput();
             m_pSerial->flushOutput();
             m_timeOut = timeOut;
+            bconfig = false;
         }
 
         //Low-level message receiving function.
@@ -157,7 +158,7 @@ namespace IMU{
                 }
 
                 // read contents and checksum
-                //std::cout<<"length: "<<length<<std::endl;
+
                 if(!waitFor(length+1))
                 {
                     std::cout<<"time out for content"<<std::endl;
@@ -263,7 +264,197 @@ namespace IMU{
         }
         InertialData m_inertialData;
 
+
+        // # High-level functions
+        //Low-level message sending function
+        void write_msg(unsigned char MID, std::vector<unsigned char> data)
+        {
+            unsigned short length = data.size();
+            std::vector<unsigned char> lendat;
+            std::vector<unsigned char> packet;
+            packet.push_back(0xFA);
+            packet.push_back(0xFF);
+            packet.push_back(MID);
+            if(length > 254)
+            {
+                lendat.resize(1+sizeof(unsigned short));
+                lendat[0] = 0xFF;
+                packNumber((unsigned char*)&lendat[1],length);
+                packet.push_back(lendat[1]);
+                packet.push_back(lendat[2]);
+            }
+            else
+            {
+                lendat.resize(1);
+                unsigned char l = length;
+                packet.push_back(l);
+            }
+            for (int j = 0; j < data.size(); ++j) {
+                packet.push_back(data[j]);
+            }
+
+            unsigned char sum = 0;
+            for (int i = 1; i < packet.size(); ++i) {
+                sum += packet[i];
+            }
+            sum*=-1;
+            unsigned char checksum = 0xFF & sum;
+            packet.push_back(checksum);
+            //while (((time.time()-start) < self.timeout) && self.device.read())
+            //    ;
+
+            timeval tv_start;;
+            gettimeofday(&tv_start,NULL);
+            long diffTime(0);//ms
+            while (m_pSerial->available() > 0)
+            {
+                timeval tv_now;
+                gettimeofday(&tv_now,NULL);
+                diffTime = 1000*(tv_now.tv_sec-tv_start.tv_sec)+(tv_now.tv_usec-tv_start.tv_usec)/1000;
+                if(diffTime > m_timeOut)
+                {
+                    std::cout<<"tim out"<<std::endl;
+                    return;// time out
+                }
+            }
+
+
+            m_pSerial->flushInput();
+            m_pSerial->flushOutput();
+            m_pSerial->write(packet);
+
+        }
+
+        //Send a message and read confirmation.
+        std::vector<unsigned char> write_ack(unsigned char MID, std::vector<unsigned char> data)
+        {
+            write_msg(MID,data);
+            unsigned char messageID_act;
+            std::vector<unsigned char> data_act;
+            for (int i = 0; i < 2; ++i) {
+                read_msg(messageID_act,data_act);
+                if(messageID_act == MID+1)
+                {
+                    break;
+                } else{
+                    std::cout<<"ack "<< int(MID+1) << " expected, got "<<(int) messageID_act <<" instead\n";
+                }
+            }
+            return data_act;
+        }
+        //Switch device to config state if necessary.
+        void _ensure_config_state()
+        {
+            if(bconfig)
+            {
+                ;
+            } else{
+                GoToConfig();
+                bconfig = true;
+            }
+        }
+
+
+
+        void GetUTCtime()
+        {
+            _ensure_config_state();
+            std::string data;
+            unsigned int ns;
+            unsigned short year;
+            unsigned char month;
+            unsigned char day;
+            unsigned char hour;
+            unsigned char minute;
+            unsigned char second;
+            unsigned char flag;
+            std::vector<unsigned char> act_data =
+                    write_ack(MIDs["SetUTCTime"], std::vector<unsigned char>());
+
+            int step = 0;
+            parseNumber(&act_data[step],ns);
+            step+=sizeof(ns);
+            parseNumber(&act_data[step],year);
+            step+=sizeof(year);
+            month = act_data[step];
+            step++;
+            day = act_data[step];
+            step++;
+            hour = act_data[step];
+            step++;
+            minute = act_data[step];
+            step++;
+            second = act_data[step];
+            step++;
+            flag = act_data[step];
+            step++;
+
+            std::cout<<"ns:"<<(unsigned int)ns<<" ";
+            std::cout<<"year:"<<(unsigned int)year<<" ";
+            std::cout<<"month:"<<(unsigned int)month<<" ";
+            std::cout<<"day:"<<(unsigned int)day<<" ";
+            std::cout<<"hour:"<<(unsigned int)hour<<" ";
+            std::cout<<"minute:"<<(unsigned int)minute<<" ";
+            std::cout<<"second:"<<(unsigned int)second<<" ";
+            std::cout<<"flag:"<<(unsigned int)flag<<std::endl;
+
+        }
+
+        void SetUTCTimeNow()
+        {
+            _ensure_config_state();
+            std::vector<unsigned char> data;
+            unsigned int ns;
+            unsigned short year;
+            unsigned char month;
+            unsigned char day;
+            unsigned char hour;
+            unsigned char minute;
+            unsigned char second;
+            unsigned char flag;
+            data.resize(12);
+            //packNumber(&ns,)
+//            data = struct.pack('!IHBBBBBB', ns, year, month, day, hour, minute,
+//                               second, flag)  # no clue what setting flag can mean
+            timeval tv;
+            gettimeofday(&tv,NULL);
+            ns = tv.tv_usec*1000;
+            struct tm *p;
+            p = gmtime(&tv.tv_sec);
+            year = p->tm_year+1900;
+
+            month = p->tm_mon+1;
+            day = p->tm_mday;
+            hour = p->tm_hour+8;
+            minute = p->tm_min;
+            second = p->tm_sec;
+            flag = 1;
+
+
+            packNumber(&data[0],ns);
+            packNumber(&data[4],year);
+
+            data[6] = (month);
+            data[7] =(day);
+            data[8] =(hour);
+            data[9] =(minute);
+            data[10] =(second);
+            data[11] =(flag);
+            write_ack(MIDs["SetUTCTime"], data);
+        }
+        void GoToMeasure()
+        {
+            _ensure_config_state();
+            write_ack(MIDs["GoToMeasurement"], std::vector<unsigned char>());
+            bconfig = false;
+        }
+
     private:
+        void GoToConfig()
+        {
+            write_ack(MIDs["GoToConfig"],std::vector<unsigned char>());
+        }
+
         bool waitFor(int size = 1)
         {
             timeval tv_start;;
@@ -291,6 +482,16 @@ namespace IMU{
             memcpy(&mem[0],src,sizeof(T));
             std::reverse(mem.begin(),mem.end());
             memcpy(&result,&mem[0],sizeof(T));
+        }
+
+        template <typename T>
+        void packNumber(unsigned char* result, T input)
+        {
+            std::vector<unsigned char> mem;
+            mem.resize(sizeof(T));
+            memcpy(&mem[0],(unsigned char*)&input,sizeof(T));
+            std::reverse(mem.begin(),mem.end());
+            memcpy(result,&mem[0],sizeof(T));
         }
 
 
@@ -455,6 +656,7 @@ namespace IMU{
         }
         std::shared_ptr<serial::Serial> m_pSerial;
         int m_timeOut;
+        bool bconfig;
 
     };
 }

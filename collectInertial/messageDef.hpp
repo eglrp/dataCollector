@@ -107,8 +107,8 @@ namespace IMU{
             {"SetHeading" , 0x82},
             // Reset orientation, 2 bytes
             {"ResetOrientation" , 0xA4},
-            // Request UTC time from sensor (MTI-G and MTi-10/100 series)
-            {"ReqUTCTime" , 0x60},
+            // Request or set UTC time from sensor (MTI-G and MTi-10/100 series)
+            {"SetUTCTime" , 0x60},
             // UTC Time (MTI-G and MTi-10/100 series), 12 bytes
             {"UTCTime" , 0x61},
             // Request the available XKF scenarios on the device

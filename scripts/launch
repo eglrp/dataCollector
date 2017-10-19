@@ -12,6 +12,7 @@ mkdir /media/ninetripod/Samsung_T3/datacollector/image
 python ./checkNet.py &
 
 cd /usr/dataCollect/bin/
+/usr/dataCollect/bin/IMU_initialization
 /usr/dataCollect/bin/collectLaser &
 /usr/dataCollect/bin/collectImages &
 /usr/dataCollect/bin/collectInertial &
