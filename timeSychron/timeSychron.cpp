@@ -135,7 +135,7 @@ int main()
             //gettimeofday(&tv,NULL);
             //ofsIMUTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
         }
-        if(imuCount % 80 == 0)
+        if(imuCount == 80)
         {
             GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
             timeval tv1;
@@ -144,14 +144,10 @@ int main()
             std::this_thread::sleep_for(std::chrono::microseconds(100));
             GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
             ofsCameraTime<<tv1.tv_sec<<","<<tv1.tv_usec<<"\n";
-        }
-        gpioIMUvalue = temp_gpioIMUvalue;
-        if(imuCount == 400)
-        {
             imuCount = 0;
             ofsCameraTime.flush();
-            //ofsIMUTime.flush();
         }
+        gpioIMUvalue = temp_gpioIMUvalue;
     }
 
 //    // use a led to telling us that the machine is working now, quite stupid
