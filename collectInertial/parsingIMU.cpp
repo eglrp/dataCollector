@@ -22,7 +22,7 @@ int main()
         timeval tv;
         gettimeofday(&tv,NULL);
         ifs >> inertialData;
-        ofs<<inertialData.Hour<<" "<<inertialData.Minute<<" "<<inertialData.Second
-           <<inertialData.ns<<std::endl;
+        ofs<<(int)inertialData.Hour<<" "<<(int)inertialData.Minute<<" "<<(int)inertialData.Second
+           <<(unsigned int)inertialData.ns<<std::endl;
     }
 }

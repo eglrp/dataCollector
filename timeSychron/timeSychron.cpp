@@ -31,17 +31,17 @@ int main()
 
     bool bStop = false;
     std::ofstream ofsCameraTime(config.cameraTimePath);
-    std::ofstream ofsIMUTime(config.IMU_triggerTimePath);
+    //std::ofstream ofsIMUTime(config.IMU_triggerTimePath);
     if (ofsCameraTime.fail())
     {
         std::cout<<"fail to open cameraTimePath\n";
         return 0;
     }
-    if (ofsIMUTime.fail())
-    {
-        std::cout<<"fail to open IMU_triggerTimePath\n";
-        return 0;
-    }
+    //if (ofsIMUTime.fail())
+    //{
+    //    std::cout<<"fail to open IMU_triggerTimePath\n";
+    //    return 0;
+    //}
 
     /// register all the gpio
     //we use I2S0_SDO1/GPIO3_D6 for IMU synOUT
@@ -131,11 +131,11 @@ int main()
         GPIO::gpio_get_value(gpio_IMU,&temp_gpioIMUvalue);
         if(temp_gpioIMUvalue == 1 && gpioIMUvalue == 0){
             imuCount++;
-            timeval tv;
-            gettimeofday(&tv,NULL);
-            ofsIMUTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
+            //timeval tv;
+            //gettimeofday(&tv,NULL);
+            //ofsIMUTime<<tv.tv_sec<<","<<tv.tv_usec<<"\n";
         }
-        if(imuCount % 20 == 0)
+        if(imuCount % 80 == 0)
         {
             GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
             timeval tv1;
@@ -144,14 +144,13 @@ int main()
             std::this_thread::sleep_for(std::chrono::microseconds(100));
             GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
             ofsCameraTime<<tv1.tv_sec<<","<<tv1.tv_usec<<"\n";
-
         }
         gpioIMUvalue = temp_gpioIMUvalue;
         if(imuCount == 400)
         {
             imuCount = 0;
             ofsCameraTime.flush();
-            ofsIMUTime.flush();
+            //ofsIMUTime.flush();
         }
     }
 
