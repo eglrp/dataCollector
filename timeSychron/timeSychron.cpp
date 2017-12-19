@@ -125,6 +125,14 @@ int main()
 //
 //    imuSynThread.join();
 
+    //we use I2S0_SDI1/GPIO3_D4 for output the GPS PPS
+    //3x32+28 = 124
+    const int goio_pps = 124;
+    GPIO::gpio_export(goio_pps);
+    GPIO::gpio_set_dir(goio_pps,GPIO::Direction::OUT);
+//
+//    /// output the pps signal and nmea
+    
     while(!bStop){
 
         unsigned int temp_gpioIMUvalue;
@@ -138,11 +146,13 @@ int main()
         if(imuCount == 80)
         {
             GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
+            GPIO::gpio_set_value(goio_pps,GPIO::Pin::HIGH);
             timeval tv1;
             gettimeofday(&tv1,NULL);
             //wait for 10 us to guarantee the GPIO is set
             std::this_thread::sleep_for(std::chrono::microseconds(100));
             GPIO::gpio_set_value(goio_camera,GPIO::Pin::LOW);
+            GPIO::gpio_set_value(goio_pps,GPIO::Pin::LOW);
             ofsCameraTime<<tv1.tv_sec<<","<<tv1.tv_usec<<"\n";
             imuCount = 0;
             ofsCameraTime.flush();
