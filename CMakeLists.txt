@@ -24,4 +24,4 @@ add_subdirectory(timeSychron)
 add_subdirectory(collectInertial)
 add_subdirectory(collectImages)
 add_subdirectory(collectLaser)
-
+add_subdirectory(timeSychronArdu)
