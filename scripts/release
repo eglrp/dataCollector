@@ -1,4 +1,5 @@
 pkill collectLaser
 pkill collectImages
 pkill collectInertial
-pkill timeSychron
+pkill timeSychronArdu
+pkill python

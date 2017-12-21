@@ -22,7 +22,8 @@ bool common::readConfig(common::sysConfig& config) {
     } else{// create a default file
         std::cout<<"no sys config,we create a default one"<<std::endl;
         config.bgood = false;
-        config.IMUport = "/dev/ttyUSB0";
+        config.IMUport = "/dev/ttyUSB1";
+        config.ArduPort = "/dev/ttyUSB0";
         config.IMU_triggerTimePath = std::string (sataFolderPath) + "imuTriggerTime.txt";
         config.cameraTimePath = std::string (sataFolderPath) + "cameraTime.txt";
         //config.IMU_dataTimePath = std::string (sataFolderPath) + "imuDataTime.txt";

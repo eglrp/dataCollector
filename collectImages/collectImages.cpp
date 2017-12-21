@@ -49,13 +49,15 @@ int main(int argc, char**argv)
         // Create a unique filename
 
         //std::cout<<"write image"<<std::endl;
-        std::ostringstream filename;
-        filename << config.imageFolderPath <<image.GetTimeStamp().seconds<<"-" <<image.GetTimeStamp().microSeconds<< "-"
-                 << ".jpg";
+        char filename[128];
+        sprintf(filename,"%010lld-%080d.jpg",image.GetTimeStamp().seconds,image.GetTimeStamp().microSeconds);
+//        std::ostringstream filename;
+//        filename << config.imageFolderPath <<image.GetTimeStamp().seconds<<"-" <<image.GetTimeStamp().microSeconds<< "-"
+//                 << ".jpg";
 
         // Save the image. If a file format is not passed in, then the file
         // extension is parsed to attempt to determine the file format.
-        error = convertedImage.Save(filename.str().c_str());
+        error = convertedImage.Save(filename);
         if (error != FlyCapture2::PGRERROR_OK)
         {
             FLYCAP_API::PrintError(error);

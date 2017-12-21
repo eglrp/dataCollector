@@ -17,6 +17,6 @@ cd /usr/dataCollect/bin/
 /usr/dataCollect/bin/collectImages &
 /usr/dataCollect/bin/collectInertial &
 
-/usr/dataCollect/bin/timeSychron &
+/usr/dataCollect/bin/timeSychronArdu &
 
 

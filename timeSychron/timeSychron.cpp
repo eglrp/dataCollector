@@ -94,7 +94,7 @@ int main()
 //    //0. a thread for trigger camera
 //    std::function<void(void)> cameraFunction = [&](void)->void {
 //        while(!bStop){
-//            if(bSetHighGPIOCamera)
+//            if()
 //            {
 //                GPIO::gpio_set_value(goio_camera,GPIO::Pin::HIGH);
 //                timeval tv;
@@ -132,7 +132,7 @@ int main()
     GPIO::gpio_set_dir(goio_pps,GPIO::Direction::OUT);
 //
 //    /// output the pps signal and nmea
-    
+
     while(!bStop){
 
         unsigned int temp_gpioIMUvalue;
