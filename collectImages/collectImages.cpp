@@ -50,7 +50,7 @@ int main(int argc, char**argv)
 
         //std::cout<<"write image"<<std::endl;
         char filename[128];
-        sprintf(filename,"%s%010lld-%08d.jpg",config.imageFolderPath,image.GetTimeStamp().seconds,image.GetTimeStamp().microSeconds);
+        sprintf(filename,"%s%010lld-%08d.jpg",config.imageFolderPath.c_str(),image.GetTimeStamp().seconds,image.GetTimeStamp().microSeconds);
 //        std::ostringstream filename;
 //        filename << config.imageFolderPath <<image.GetTimeStamp().seconds<<"-" <<image.GetTimeStamp().microSeconds<< "-"
 //                 << ".jpg";
