@@ -33,7 +33,7 @@ bool ArduCommunicator::getTime() {
     double average = 0;
     for (int j = 0; j < offsets.size(); ++j) {
         //qDebug("offset:%lf",offsets[j]);
-        average = average + offsets[j]-offsets[0];
+        average = average + (offsets[j]-offsets[0]);
     }
     average = average/offsets.size() + offsets[0];
     //qDebug("average offset:%lf",average);
@@ -89,7 +89,6 @@ bool ArduCommunicator::startMeasure(std::ofstream &ofs) {
     while(1)
     {
         double time = readMeasurement();
-        time = time+_systemOffset;
         if(time == -1)
         {
             qDebug("fail to read");
