@@ -38,6 +38,9 @@ namespace IMU{
         double gyroX,gyroY,gyroZ;
         //Status word
         unsigned int statusWord;
+        //orientaiton
+        double q0,q1,q2,q3;
+
 
         void write(std::ostream& os)
         {
@@ -61,6 +64,10 @@ namespace IMU{
             os.write(reinterpret_cast<char*> (&gyroY), sizeof(double));
             os.write(reinterpret_cast<char*> (&gyroZ), sizeof(double));
             os.write(reinterpret_cast<char*> (&statusWord), sizeof(unsigned int));
+            os.write(reinterpret_cast<char*> (&q0), sizeof(double));
+            os.write(reinterpret_cast<char*> (&q1), sizeof(double));
+            os.write(reinterpret_cast<char*> (&q2), sizeof(double));
+            os.write(reinterpret_cast<char*> (&q3), sizeof(double));
         }
 
         void read(std::istream& is)
@@ -85,6 +92,10 @@ namespace IMU{
             is.read(reinterpret_cast<char*> (&gyroY), sizeof(double));
             is.read(reinterpret_cast<char*> (&gyroZ), sizeof(double));
             is.read(reinterpret_cast<char*> (&statusWord), sizeof(unsigned int));
+            is.read(reinterpret_cast<char*> (&q0), sizeof(double));
+            is.read(reinterpret_cast<char*> (&q1), sizeof(double));
+            is.read(reinterpret_cast<char*> (&q2), sizeof(double));
+            is.read(reinterpret_cast<char*> (&q3), sizeof(double));
         }
     };
 
@@ -260,8 +271,13 @@ namespace IMU{
                 {
                     parseStatus(dataId,values);
                 }
+                else if(groupName.compare("OrientationData") == 0)
+                {
+                    parse_orientation_data(dataId,values,float_format);
+                }
             }
         }
+
         InertialData m_inertialData;
 
 
@@ -654,6 +670,37 @@ namespace IMU{
                 std::cout<<"useless information\n";
             }
         }
+
+        void parse_orientation_data(const unsigned short& dataID, const std::vector<unsigned char>& values, char floatFormat)
+        {
+            //assume that the float format is set to double... i am lazy.. forgive me
+            if ((dataID&0x00F0) == 0x10)// Quaternion
+            {
+                double q0,q1,q2,q3;
+                parseNumber(&values[0],q0);
+                parseNumber(&values[0+ sizeof(double)],q1);
+                parseNumber(&values[0+ 2*sizeof(double)],q2);
+                parseNumber(&values[0+ 3*sizeof(double)],q3);
+
+                m_inertialData.q0 = q0;
+                m_inertialData.q1 = q1;
+                m_inertialData.q2 = q2;
+                m_inertialData.q3 = q3;
+            }
+            else if ((dataID&0x00F0) == 0x20)//Rotation Matrix
+            {
+                //LOG(ERROR)<<"MTI orientation is set to rotation matrix!! ";
+            }
+            else if ((dataID&0x00F0) == 0x30)//Euler Angles
+            {
+
+            }
+            else{
+                std::cout<<"useless information\n";
+            }
+        }
+
+
         std::shared_ptr<serial::Serial> m_pSerial;
         int m_timeOut;
         bool bconfig;
