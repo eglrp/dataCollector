@@ -9,8 +9,9 @@
 #include <fstream>
 #include <common.hpp>
 
-int main()
+int main(int argc, char** argv)
 {
+    QCoreApplication application(argc, argv);
     //load sysconfig
     common::sysConfig config;
     if(!common::readConfig(config))

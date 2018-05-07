@@ -12,6 +12,18 @@
 #include <ostream>
 #include <istream>
 
+#include <QtSerialPort/QSerialPortInfo>
+#include <QtSerialPort/QSerialPort>
+#include <QTextStream>
+#include <QCoreApplication>
+#include <QtCore/QTimer>
+#include <QObject>
+#include <QThread>
+#include <QString>
+#include <QDebug>
+
+#include "glog/logging.h"
+
 namespace IMU{
     struct InertialData{
 
@@ -114,23 +126,43 @@ namespace IMU{
     public:
         InertialDivice(std::string port, int baudRate=460800, uint32_t timeOut=1000)
         {
-            m_pSerial = std::make_shared<serial::Serial>(port, baudRate, serial::Timeout::simpleTimeout(timeOut));
-            m_pSerial->flushInput();
-            m_pSerial->flushOutput();
+//            m_pSerial = std::make_shared<serial::Serial>(port, baudRate, serial::Timeout::simpleTimeout(timeOut));
+//            m_pSerial->flushInput();
+//            m_pSerial->flushOutput();
             m_timeOut = timeOut;
             bconfig = false;
+//            std::cout<<"create IMU from port :" <<port << "\n";
+
+            qserial = std::make_shared<QSerialPort>();
+            qserial->setPortName(port.c_str());
+            if (qserial->open(QIODevice::ReadWrite)) {
+                //qserial->setBaudRate(QSerialPort::Baud115200);
+                qserial->setBaudRate(baudRate);
+                qserial->setDataBits(QSerialPort::Data8);
+                qserial->setParity(QSerialPort::NoParity);
+                qserial->setStopBits(QSerialPort::OneStop);
+                qserial->setFlowControl(QSerialPort::NoFlowControl);
+
+                std::cout<<"create IMU from port :" <<port << "\n";
+            } else{
+                std::cout<<"fail to create IMU from port :" <<port << "\n";
+                //LOG(ERROR)<<"fail to create IMU from port :" <<port << "\n";
+            }
+            qserial->flush();
         }
 
         //Low-level message receiving function.
         bool read_msg(unsigned char &messageID, std::vector<unsigned char> &data)
         {
-            std::string str;
+            //std::string str;
+            QByteArray b_str;
 
-            timeval tv_start;;
+            timeval tv_start;
             gettimeofday(&tv_start,NULL);
             long diffTime(0);//ms
             while (diffTime < m_timeOut)
             {
+
                 timeval tv_now;
                 gettimeofday(&tv_now,NULL);
                 diffTime = 1000*(tv_now.tv_sec-tv_start.tv_sec)+(tv_now.tv_usec-tv_start.tv_usec)/1000;
@@ -139,33 +171,44 @@ namespace IMU{
                     std::cout<<"time out for Preamble, indicator of start of packet"<<std::endl;
                     continue;
                 }
-                str = m_pSerial->read(1);
+                //str = m_pSerial->read(1);
 
-                if ((unsigned char)str[0] != 0xFA) //  0xFA: Preamble, indicator of start of packet
+                //str.resize(1);
+                b_str = qserial->read(1);
+                //qserial->read(&str[0],1);
+
+                if ((unsigned char)b_str[0] != 0xFA) //  0xFA: Preamble, indicator of start of packet
                 {
-                    //std::cout<<"start"<<std::endl;
+                    //std::cout<<"not start: "<<(int)str[0]<<std::endl;
                     continue;
                 }
+
                 if(!waitFor(3))
                 {
                     std::cout<<"time out for Bus identifier"<<std::endl;
                     continue;
                 }
-                str = m_pSerial->read(3);
-                if ((unsigned char)str[0] != 0xFF) // 0xFF: Bus identifier
+                //str = m_pSerial->read(3);
+//                str.resize(3);
+//                qserial->read(&str[0],3);
+                b_str = qserial->read(3);
+                if ((unsigned char)b_str[0] != 0xFF) // 0xFF: Bus identifier
                 {
                     std::cout<<"Bus identifier"<<std::endl;
                     continue;
                 }
 
-                messageID = (unsigned char)str[1];
-                unsigned short length = (unsigned char)str[2];
+                messageID = (unsigned char)b_str[1];
+                unsigned short length = (unsigned char)b_str[2];
                 if (length == 0xFF)
                 {
                     waitFor(2);
-                    str = m_pSerial->read(2);
+                    //str = m_pSerial->read(2);
+//                    str.resize(2);
+//                    qserial->read(&str[0],2);
+                    b_str = qserial->read(2);
                     //memcpy(&length,&str[0],sizeof(length)); // wrong!!
-                    length = (unsigned char)str[0]*0x100+(unsigned char)str[1];
+                    length = (unsigned char)b_str[0]*0x100+(unsigned char)b_str[1];
                 }
 
                 // read contents and checksum
@@ -175,20 +218,26 @@ namespace IMU{
                     std::cout<<"time out for content"<<std::endl;
                     return false;
                 }
-                str = m_pSerial->read(length+1);
-                if(str.length() < length+1)
+                //str = m_pSerial->read(length+1);
+                //str.resize(length+1);
+                //qserial->read(&str[0],length+1);
+                b_str = qserial->read(length+1);
+                if(b_str.length() < length+1)
                 {
                     std::cout<<"unbelievable! I've waited for it!"<<std::endl;
                     continue;
                 }
-                unsigned char checksum = (unsigned char)*(str.end()-1);
+                unsigned char checksum = b_str[length];
                 //std::vector<unsigned char> data;
                 data.resize(length);
-                memcpy(&data[0],&str[0],length);
+                //memcpy(&data[0],(unsigned char*)(&b_str[0]),length);
+                for (int i = 0; i < length; ++i) {
+                    data[i] = b_str[i];
+                }
 
                 if (messageID == IMU::MIDs["Error"])
                 {
-                    std::cout<<"A error form imu"<<std::endl;
+                    std::cout<<"A error from imu"<<std::endl;
                     continue;
                 }
 
@@ -196,6 +245,7 @@ namespace IMU{
                 sum += 0xFF+messageID;
                 if(length > 255)
                 {
+                    std::cout<<"big data\n";
                     sum+=0xFF+length/0x100+length%0x100;
                 } else{
                     sum+=length;
@@ -206,12 +256,12 @@ namespace IMU{
                 sum += checksum;
                 if (0xFF & sum)
                 {
-                    std::cout<<"check sum is not zero"<<std::endl;
-                    continue;
+                    std::cout<<"check sum is not zero:"<< int(0xFF & sum )<<std::endl;
+                    //continue;
                 }
                 return true;
             }
-            std::cout<<"time out"<<std::endl;
+            std::cout<<"canot find message"<<std::endl;
             return false;
         }
 
@@ -322,22 +372,26 @@ namespace IMU{
             timeval tv_start;;
             gettimeofday(&tv_start,NULL);
             long diffTime(0);//ms
-            while (m_pSerial->available() > 0)
-            {
-                timeval tv_now;
-                gettimeofday(&tv_now,NULL);
-                diffTime = 1000*(tv_now.tv_sec-tv_start.tv_sec)+(tv_now.tv_usec-tv_start.tv_usec)/1000;
-                if(diffTime > m_timeOut)
-                {
-                    std::cout<<"tim out"<<std::endl;
-                    return;// time out
-                }
-            }
+            //while (m_pSerial->available() > 0)
+//            while (qserial->bytesAvailable() > 0)
+//            {
+//                //std::cout<<qserial->bytesAvailable()<<std::endl;
+//                timeval tv_now;
+//                gettimeofday(&tv_now,NULL);
+//                diffTime = 1000*(tv_now.tv_sec-tv_start.tv_sec)+(tv_now.tv_usec-tv_start.tv_usec)/1000;
+//                if(diffTime > m_timeOut)
+//                {
+//                    std::cout<<"time out"<<std::endl;
+//                    return;// time out
+//                }
+//            }
 
 
-            m_pSerial->flushInput();
-            m_pSerial->flushOutput();
-            m_pSerial->write(packet);
+//            m_pSerial->flushInput();
+//            m_pSerial->flushOutput();
+//            m_pSerial->write(packet);
+            qserial->flush();
+            qserial->write((char*)&packet[0],packet.size());
 
         }
 
@@ -476,8 +530,12 @@ namespace IMU{
             timeval tv_start;;
             gettimeofday(&tv_start,NULL);
             long diffTime(0);//ms
-            while (m_pSerial->available()<size)
+
+            //while (m_pSerial->available()<size)
+            while (qserial->bytesAvailable()<size)
             {
+                qserial->waitForReadyRead(1);
+                //std::cout<<qserial->bytesAvailable()<<std::endl;
                 timeval tv_now;
                 gettimeofday(&tv_now,NULL);
                 diffTime = 1000*(tv_now.tv_sec-tv_start.tv_sec)+(tv_now.tv_usec-tv_start.tv_usec)/1000;
@@ -485,7 +543,6 @@ namespace IMU{
                 {
                     return false;// time out
                 }
-
             }
             return true;
         }
@@ -701,7 +758,9 @@ namespace IMU{
         }
 
 
-        std::shared_ptr<serial::Serial> m_pSerial;
+        //std::shared_ptr<serial::Serial> m_pSerial;
+        //serial
+        std::shared_ptr<QSerialPort> qserial;
         int m_timeOut;
         bool bconfig;
 

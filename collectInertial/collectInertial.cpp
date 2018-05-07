@@ -11,8 +11,11 @@
 
 
 
-int main()
+
+
+int main(int argc, char** argv)
 {
+    QCoreApplication application(argc, argv);
     //load sysconfig
     common::sysConfig config;
     if(!common::readConfig(config))
@@ -36,11 +39,16 @@ int main()
         gettimeofday(&tv,NULL);
         device.parse_MTData2(data);
         ofs << device.m_inertialData;
+        std::cout<<device.m_inertialData.accZ<<std::endl;
+        std::cout<<device.m_inertialData.accY<<std::endl;
+        std::cout<<device.m_inertialData.accX<<std::endl;
+
         count ++;
         if(count == 400)
         {
             ofs.flush();
         }
     }
+    application.exec();
     return 0;
 }
